@@ -1,0 +1,17 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
+.matrix-cell {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.matrix-cell:hover {
+  transform: scale(1.05);
+}
