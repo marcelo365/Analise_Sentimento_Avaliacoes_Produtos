@@ -16,42 +16,8 @@ const mRecall = document.getElementById("mRecall");
 const mF1 = document.getElementById("mF1");
 
 /*************************************
- * MODELO (SIMULAÇÃO)
- * depois podes trocar por API real
+ * UTILITÁRIOS
  *************************************/
-function analyzeSentiment(text) {
-  const lower = text.toLowerCase();
-
-  if (lower.includes("bom") || lower.includes("excelente") || lower.includes("ótimo")) {
-    return { label: "Positiva", confidence: randomBetween(85, 97) };
-  }
-
-  if (lower.includes("péssimo") || lower.includes("mau") || lower.includes("horrível")) {
-    return { label: "Negativa", confidence: randomBetween(80, 95) };
-  }
-
-  return { label: "Neutra", confidence: randomBetween(70, 90) };
-}
-
-/*************************************
- * MÉTRICAS (SIMULADAS)
- *************************************/
-function getModelMetrics() {
-  return {
-    accuracy: randomBetween(85, 95),
-    precision: randomBetween(80, 94),
-    recall: randomBetween(78, 92),
-    f1: randomBetween(80, 93)
-  };
-}
-
-/*************************************
- * UTIL
- *************************************/
-function randomBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 function showError(message) {
   errorBox.textContent = message;
   errorBox.classList.remove("hidden");
@@ -62,11 +28,10 @@ function hideError() {
 }
 
 /*************************************
- * EVENTO PRINCIPAL
+ * INPUT ÚNICO - CHAMADA API
  *************************************/
-analyzeBtn.addEventListener("click", () => {
+analyzeBtn.addEventListener("click", async () => {
   hideError();
-
   const text = inputText.value.trim();
 
   if (!text) {
@@ -74,41 +39,52 @@ analyzeBtn.addEventListener("click", () => {
     return;
   }
 
-  // Analisa
-  const prediction = analyzeSentiment(text);
-  const metrics = getModelMetrics();
+  try {
+    const response = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
 
-  // Atualiza UI
-  resultText.textContent = text;
-  resultSentiment.textContent = prediction.label;
-  resultConfidence.textContent = prediction.confidence + "%";
+    if (!response.ok) {
+      throw new Error("Erro na requisição à API");
+    }
 
-  // Cor do sentimento
-  resultSentiment.className = "text-2xl font-bold";
-  if (prediction.label === "Positiva") {
-    resultSentiment.classList.add("text-green-600");
-  } else if (prediction.label === "Negativa") {
-    resultSentiment.classList.add("text-red-600");
-  } else {
-    resultSentiment.classList.add("text-gray-600");
+    const data = await response.json();
+
+    // Atualiza UI com resultado da frase
+    resultText.textContent = data.text;
+    resultSentiment.textContent = data.predicted;
+    resultConfidence.textContent = data.confidence + "%";
+
+    resultSentiment.className = "text-2xl font-bold";
+    if (data.predicted === "Positiva") {
+      resultSentiment.classList.add("text-green-600");
+    } else if (data.predicted === "Negativa") {
+      resultSentiment.classList.add("text-red-600");
+    } else {
+      resultSentiment.classList.add("text-gray-600");
+    }
+
+    // Mostra resultado, mas não métricas
+    resultSection.classList.remove("hidden");
+    mAccuracy.textContent = "";
+    mPrecision.textContent = "";
+    mRecall.textContent = "";
+    mF1.textContent = "";
+
+  } catch (err) {
+    showError("❌ Não foi possível conectar à API.");
+    console.error(err);
   }
-
-  // Métricas
-  mAccuracy.textContent = metrics.accuracy;
-  mPrecision.textContent = metrics.precision;
-  mRecall.textContent = metrics.recall;
-  mF1.textContent = metrics.f1;
-
-  // Mostrar secção
-  resultSection.classList.remove("hidden");
 });
 
 /*************************************
  * UPLOAD DE FICHEIRO (placeholder)
  *************************************/
-document.getElementById("fileUpload").addEventListener("change", (e) => {
+document.getElementById("fileUpload").addEventListener("change", async (e) => {
+  e.preventDefault();
   const file = e.target.files[0];
-
   if (!file) return;
 
   if (!file.name.endsWith(".csv") && !file.name.endsWith(".xlsx")) {
@@ -116,5 +92,42 @@ document.getElementById("fileUpload").addEventListener("change", (e) => {
     return;
   }
 
-  alert(`📂 Ficheiro "${file.name}" carregado com sucesso (processamento ainda não implementado).`);
+  hideError();
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("http://127.0.0.1:5000/predict-file", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao processar ficheiro");
+    }
+
+    const data = await response.json();
+
+    console.log(data);
+    // 🔹 MÉTRICAS REAIS DO MODELO
+    mAccuracy.textContent = data.metrics.accuracy;
+    mPrecision.textContent = data.metrics.precision;
+    mRecall.textContent = data.metrics.recall;
+    mF1.textContent = data.metrics.f1;
+
+    // 🔹 Mostrar secção de resultados
+    resultSection.classList.remove("hidden");
+
+    // 🔹 Limpar resultado de frase única
+    resultText.textContent = "";
+    resultSentiment.textContent = "";
+    resultConfidence.textContent = "";
+
+    console.log("Ficheiro salvo em:", data.saved_file);
+
+  } catch (err) {
+    showError("❌ Erro ao enviar ficheiro para a API.");
+    console.error(err);
+  }
 });

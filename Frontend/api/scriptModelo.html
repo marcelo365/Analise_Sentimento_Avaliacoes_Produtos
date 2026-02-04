@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Análise de Sentimento</title>
+
+  <!-- PyScript estável -->
+  <link rel="stylesheet" href="https://pyscript.net/unstable/pyscript.css">
+  <script defer src="https://pyscript.net/unstable/pyscript.js"></script>
+
+  <style>
+    body { font-family: Arial; padding: 40px; }
+    input { width: 400px; padding: 10px; }
+    button { padding: 10px 20px; margin-left: 10px; }
+    #resultado { margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+
+<body>
+
+<h2>Análise de Sentimento</h2>
+
+<input id="textoInput" type="text" placeholder="Digite uma frase..." />
+<button py-click="prever_sentimento">Analisar</button>
+
+<div id="resultado"></div>
+
+<py-config>
+packages = ["scikit-learn", "numpy", "joblib"]
+</py-config>
+
+<py-script>
+import joblib
+from js import document
+
+modelo = joblib.load("modelo_logistic_regression.joblib")
+
+def prever_sentimento():
+    texto = document.getElementById("textoInput").value
+
+    if not texto.strip():
+        document.getElementById("resultado").innerText = "Digite uma frase."
+        return
+
+    previsao = modelo.predict([texto])[0]
+    document.getElementById("resultado").innerText = f"Sentimento previsto: {previsao}"
+</py-script>
+
+</body>
+</html>
