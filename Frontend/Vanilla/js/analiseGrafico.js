@@ -7,10 +7,11 @@ let metricsData = null;
 let distributionData = null;
 let perClassData = null;
 let confusionData = null;
+let confidenceByClassData = null;
 
-// =======================
-// PRÉ-VISUALIZAÇÃO
-// =======================
+/* =======================
+   PRÉ-VISUALIZAÇÃO + FILTRO
+======================= */
 
 let currentPage = 1;
 const rowsPerPage = 5;
@@ -25,6 +26,8 @@ function getFilteredData() {
 }
 
 function renderTable() {
+  if (!excelData) return;
+
   const filtered = getFilteredData();
   const start = (currentPage - 1) * rowsPerPage;
   const pageData = filtered.slice(start, start + rowsPerPage);
@@ -66,20 +69,18 @@ confidenceInput.oninput = () => {
 };
 
 /* =======================
-   GRÁFICOS
+   GRÁFICOS DISTRIBUIÇÃO
 ======================= */
 
 function renderDistributionCharts() {
-  // usar os labels reais do backend
+  if (!excelData) return;
+
   const counts = { Positiva: 0, Negativa: 0, Neutra: 0 };
 
   excelData.forEach(r => {
-    if (counts[r.pred] !== undefined) {
-      counts[r.pred]++;
-    }
+    if (counts[r.pred] !== undefined) counts[r.pred]++;
   });
 
-  // Gráfico pizza
   new Chart(document.getElementById("distributionChart"), {
     type: "pie",
     data: {
@@ -88,89 +89,127 @@ function renderDistributionCharts() {
     }
   });
 
-  // Gráfico barras
   new Chart(document.getElementById("predictionVsTrueChart"), {
     type: "bar",
     data: {
       labels: Object.keys(counts),
-      datasets: [
-        {
-          label: "Predições",
-          data: Object.values(counts)
-        }
-      ]
+      datasets: [{
+        label: "Predições",
+        data: Object.values(counts)
+      }]
     }
   });
 
-  // Resumo
   const container = document.getElementById("distributionValues");
   container.innerHTML = Object.entries(counts)
-    .map(([k, v]) => `<div><b>${k}</b>: ${v}</div>`)
+    .map(([k,v]) => `<div><b>${k}</b>: ${v}</div>`)
     .join("");
 }
 
+/* =======================
+   NOVOS GRÁFICOS DESEMPENHO
+======================= */
 
-function renderAccuracyChart() {
-  new Chart(document.getElementById("accuracyChart"), {
-    type: "doughnut",
-    data: {
-      labels: ["Accuracy", "Erro"],
-      datasets: [
-        {
-          data: [metricsData.accuracy, 100 - metricsData.accuracy]
-        }
-      ]
-    }
-  });
-}
+function renderConfidenceByClassChart() {
+  if (!confidenceByClassData) return;
 
-function renderPrecisionRecallCurve() {
-  const labels = perClassData.map(d => d.class);
-  const precision = perClassData.map(d => d.precision);
-  const recall = perClassData.map(d => d.recall);
+  const labels = confidenceByClassData.map(d => d.class);
+  const values = confidenceByClassData.map(d => d.avg_confidence);
 
-  new Chart(document.getElementById("precisionRecallCurve"), {
-    type: "line",
+  new Chart(document.getElementById("confidenceByClassChart"), {
+    type: "bar",
     data: {
       labels,
-      datasets: [
-        {
-          label: "Precisão",
-          data: precision,
-          borderColor: "rgba(54, 162, 235, 1)",
-          backgroundColor: "rgba(54, 162, 235, 0.2)",
-          fill: true,
-          tension: 0.3
-        },
-        {
-          label: "Recall",
-          data: recall,
-          borderColor: "rgba(255, 99, 132, 1)",
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          fill: true,
-          tension: 0.3
-        }
-      ]
+      datasets: [{
+        label: "Confiança Média (%)",
+        data: values
+      }]
     },
     options: {
-      responsive: true,
       scales: {
-        y: {
-          beginAtZero: true,
-          max: 100
-        }
+        y: { beginAtZero: true, max: 100 }
       }
     }
   });
 }
 
+function renderPrecisionRecallBarChart() {
+  if (!perClassData) return;
 
-function renderPerClassMetrics() {
   const labels = perClassData.map(d => d.class);
   const precision = perClassData.map(d => d.precision);
   const recall = perClassData.map(d => d.recall);
   const f1 = perClassData.map(d => d.f1);
 
+  new Chart(document.getElementById("precisionRecallBarChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        { label: "Precisão", data: precision },
+        { label: "Recall", data: recall },
+        { label: "F1", data: f1 }
+      ]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true, max: 100 }
+      }
+    }
+  });
+}
+
+/* =======================
+   PRECISION-RECALL CURVE
+======================= */
+
+let prCurveChart = null;
+
+function renderPrecisionRecallCurveChart(prCurvesData) {
+  if (!prCurvesData) return;
+
+  const ctx = document.getElementById("precisionRecallCurveChart").getContext("2d");
+
+  if (prCurveChart) prCurveChart.destroy();
+
+  const datasets = Object.entries(prCurvesData).map(([label, data], idx) => ({
+    label: `${label} (AP=${data.ap})`,
+    data: data.recall.map((r, i) => ({ x: r, y: data.precision[i] })),
+    borderColor: ["#1f77b4","#ff7f0e","#2ca02c"][idx % 3],
+    backgroundColor: "transparent",
+    tension: 0.2
+  }));
+
+  prCurveChart = new Chart(ctx, {
+    type: "line",
+    data: { datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: "Precision–Recall Curve" },
+        legend: { position: "bottom" }
+      },
+      scales: {
+        x: { type: "linear", title: { display: true, text: "Recall" }, min: 0, max: 1 },
+        y: { title: { display: true, text: "Precision" }, min: 0, max: 1 }
+      }
+    }
+  });
+}
+
+/* =======================
+   MÉTRICAS POR CLASSE
+======================= */
+
+function renderPerClassMetrics() {
+  if (!perClassData) return;
+
+  const labels = perClassData.map(d => d.class);
+  const precision = perClassData.map(d => d.precision);
+  const recall = perClassData.map(d => d.recall);
+  const f1 = perClassData.map(d => d.f1);
+
+  // ===== GRÁFICO =====
   new Chart(document.getElementById("perClassMetricsChart"), {
     type: "bar",
     data: {
@@ -180,25 +219,37 @@ function renderPerClassMetrics() {
         { label: "Recall", data: recall },
         { label: "F1", data: f1 }
       ]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
     }
   });
 
+  // ===== TABELA =====
   const table = document.getElementById("perClassMetricsTable");
-  table.innerHTML = labels
-    .map(
-      (l, i) => `
-      <tr>
-        <td class="border px-3 py-2">${l}</td>
-        <td class="border px-3 py-2">${precision[i].toFixed(1)}%</td>
-        <td class="border px-3 py-2">${recall[i].toFixed(1)}%</td>
-        <td class="border px-3 py-2">${f1[i].toFixed(1)}%</td>
-      </tr>
-    `
-    )
-    .join("");
+
+  table.innerHTML = perClassData.map(d => `
+    <tr>
+      <td class="border px-3 py-2">${d.class}</td>
+      <td class="border px-3 py-2">${d.precision.toFixed(1)}%</td>
+      <td class="border px-3 py-2">${d.recall.toFixed(1)}%</td>
+      <td class="border px-3 py-2">${d.f1.toFixed(1)}%</td>
+    </tr>
+  `).join("");
 }
 
+/* =======================
+   MATRIZ DE CONFUSÃO
+======================= */
+
 function renderConfusionMatrix() {
+  if (!confusionData) return;
+
   const matrixBody = document.getElementById("confusionMatrixContainer");
   const statsTable = document.getElementById("confusionStatsTable");
   const headerRow = document.getElementById("cmHeader");
@@ -210,78 +261,75 @@ function renderConfusionMatrix() {
   const labels = confusionData.labels;
   const matrix = confusionData.matrix;
 
-  // ===== HEADER DA MATRIZ =====
-  headerRow.innerHTML = "<th class='border px-3 py-2 bg-blue-200'>Real \\ Prev</th>";
+  headerRow.innerHTML =
+    "<th class='border px-3 py-2 bg-blue-200'>Real \\ Prev</th>";
+
   labels.forEach(l => {
-    headerRow.innerHTML += `<th class="border px-3 py-2 bg-blue-200">${l}</th>`;
+    headerRow.innerHTML +=
+      `<th class="border px-3 py-2 bg-blue-200">${l}</th>`;
   });
 
-  // ===== MAX para escala de cor =====
   const maxVal = Math.max(...matrix.flat());
 
-  // ===== MATRIZ AZUL =====
   matrix.forEach((row, i) => {
     let tr = `<tr><th class="border px-3 py-2 bg-blue-100">${labels[i]}</th>`;
 
-    row.forEach((val, j) => {
-      const intensity = val / maxVal;
-      const alpha = 0.15 + intensity * 0.7;
+    row.forEach(val => {
+      const alpha = 0.15 + (val / maxVal) * 0.7;
 
       tr += `
         <td class="border px-3 py-2 font-semibold"
             style="background: rgba(37,99,235,${alpha})">
           ${val}
-        </td>
-      `;
+        </td>`;
     });
 
     tr += "</tr>";
     matrixBody.innerHTML += tr;
   });
 
-  // ===== TABELA TP FP FN TN =====
   labels.forEach((cls, idx) => {
-
     const tp = matrix[idx][idx];
-
-    const fn = matrix[idx].reduce((s,v,i)=> i!==idx ? s+v : s, 0);
-
-    const fp = matrix.reduce((s,row,i)=> i!==idx ? s+row[idx] : s, 0);
-
+    const fn = matrix[idx].reduce((s,v,i)=> i!==idx? s+v:s,0);
+    const fp = matrix.reduce((s,row,i)=> i!==idx? s+row[idx]:s,0);
     const tn = matrix.reduce((s,row,i)=>
       s + row.reduce((ss,val,j)=>
-        (i!==idx && j!==idx) ? ss+val : ss, 0)
-    ,0);
+        (i!==idx && j!==idx ? ss+val : ss),0),0);
 
     statsTable.innerHTML += `
       <tr>
-        <td class="border px-3 py-2 font-medium">${cls}</td>
+        <td class="border px-3 py-2">${cls}</td>
         <td class="border px-3 py-2">${tp}</td>
         <td class="border px-3 py-2">${fp}</td>
         <td class="border px-3 py-2">${fn}</td>
         <td class="border px-3 py-2">${tn}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
-
 /* =======================
-   INICIALIZAÇÃO
+   INIT DASHBOARD
 ======================= */
 
 function initDashboard() {
   renderTable();
   renderDistributionCharts();
-  renderAccuracyChart();
-  renderPrecisionRecallCurve();
+  renderConfidenceByClassChart();
+  renderPrecisionRecallBarChart();
   renderPerClassMetrics();
   renderConfusionMatrix();
+
+  // Novo gráfico Precision-Recall Curve
+  if (metricsData && metricsData.pr_curves) {
+    renderPrecisionRecallCurveChart(metricsData.pr_curves || window.prCurvesData);
+  } else if (window.prCurvesData) {
+    renderPrecisionRecallCurveChart(window.prCurvesData);
+  }
 }
 
-// =======================
-// FETCH BACKEND
-// =======================
+/* =======================
+   FETCH BACKEND
+======================= */
 
 document.addEventListener("DOMContentLoaded", () => {
   fetch("http://localhost:5000/last-results")
@@ -295,10 +343,10 @@ document.addEventListener("DOMContentLoaded", () => {
       distributionData = data.distribution;
       perClassData = data.per_class_metrics;
       confusionData = data.confusion_matrix;
+      confidenceByClassData = data.confidence_by_class;
+      window.prCurvesData = data.pr_curves; 
 
       initDashboard();
     })
-    .catch(err => {
-      console.warn(err.message);
-    });
+    .catch(err => console.warn(err.message));
 });

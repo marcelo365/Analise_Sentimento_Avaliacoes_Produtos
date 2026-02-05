@@ -166,12 +166,19 @@
         <h3 class="text-lg font-semibold mb-6">Desempenho do Modelo</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Grafico 1 -->
           <div class="h-[320px]">
-            <canvas id="accuracyChart"></canvas>
+            <canvas id="confidenceByClassChart"></canvas>
           </div>
 
+          <!-- Grafico 2 -->
           <div class="h-[320px]">
-            <canvas id="precisionRecallCurve"></canvas>
+            <canvas id="precisionRecallBarChart"></canvas>
+          </div>
+
+          <!-- Novo gráfico Precision-Recall Curve -->
+          <div class="mt-8 h-[320px]">
+            <canvas id="precisionRecallCurveChart"></canvas>
           </div>
         </div>
       </div>
@@ -199,7 +206,6 @@
         </div>
       </div>
 
-      
       <!-- CARD 5 -->
       <div class="bg-white rounded-lg shadow-md p-6">
         <h3 class="text-lg font-semibold mb-6">Matriz de Confusão</h3>

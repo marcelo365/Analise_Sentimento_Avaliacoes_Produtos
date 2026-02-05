@@ -4,6 +4,8 @@ import joblib
 import pandas as pd
 import os
 from datetime import datetime
+from sklearn.preprocessing import label_binarize
+from sklearn.metrics import precision_recall_curve, average_precision_score
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -48,7 +50,7 @@ def predict():
     })
 
 # =====================================================
-# PREVISÃO DE FICHEIRO (CSV / XLSX)
+# PREVISÃO DE FICHEIRO (CSV / XLSX) + PR CURVE
 # =====================================================
 @app.route("/predict-file", methods=["POST"])
 def predict_file():
@@ -78,6 +80,18 @@ def predict_file():
 
     df["pred"] = [LABELS[int(p)] for p in y_pred]
     df["confidence"] = np.max(y_proba, axis=1) * 100
+
+    # Confiança média por classe prevista
+    confidence_by_class = (
+        df.groupby("pred")["confidence"]
+        .mean()
+        .round(2)
+        .reset_index()
+    )
+    confidence_by_class_data = [
+        {"class": row["pred"], "avg_confidence": float(row["confidence"])}
+        for _, row in confidence_by_class.iterrows()
+    ]
 
     # Métricas globais
     metrics = {
@@ -116,6 +130,27 @@ def predict_file():
     preview["confidence"] = preview["confidence"].round(2)
     preview_data = preview.to_dict(orient="records")
 
+    # ==========================================
+    # PRECISION-RECALL CURVE
+    # ==========================================
+    y_true_bin = label_binarize(y_true, classes=list(LABELS.keys()))
+    pr_curves = {}
+
+    for i, label_name in LABELS.items():
+        precision, recall, _ = precision_recall_curve(
+            y_true_bin[:, i],
+            y_proba[:, i]
+        )
+        ap = average_precision_score(
+            y_true_bin[:, i],
+            y_proba[:, i]
+        )
+        pr_curves[label_name] = {
+            "precision": precision.tolist(),
+            "recall": recall.tolist(),
+            "ap": round(float(ap), 3)
+        }
+
     # Salvar resultado
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     OUTPUT_DIR = os.path.join(BASE_DIR, "resultados")
@@ -135,9 +170,11 @@ def predict_file():
         "metrics": metrics,
         "distribution": distribution,
         "per_class_metrics": per_class_metrics,
+        "confidence_by_class": confidence_by_class_data,
         "confusion_matrix": confusion,
         "preview": preview_data,
-        "saved_file": output_name
+        "saved_file": output_name,
+        "pr_curves": pr_curves  
     }
 
     return jsonify(LAST_RESULT)
@@ -152,7 +189,7 @@ def last_results():
     return jsonify(LAST_RESULT)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=5000, debug=True)
 
 
 if __name__ == "__main__":

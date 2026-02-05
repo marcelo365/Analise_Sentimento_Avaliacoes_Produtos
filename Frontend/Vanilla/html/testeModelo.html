@@ -7,44 +7,23 @@
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Ícones (lucide via SVG inline depois ou emojis por enquanto) -->
     <link rel="stylesheet" href="../css/testeModelo.css" />
   </head>
 
-  <body
-    class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50"
-  >
+  <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
     <!-- ================= HEADER ================= -->
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex items-center gap-3">
-          <div
-            class="bg-gradient-to-br from-blue-600 to-purple-600 p-3 rounded-xl"
-          >
-            <!-- Ícone Brain -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-8 h-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 3a3 3 0 00-3 3v1a3 3 0 000 6v1a3 3 0 006 0V6a3 3 0 00-3-3zM15 3a3 3 0 013 3v1a3 3 0 010 6v1a3 3 0 01-6 0V6a3 3 0 013-3z"
-              />
+          <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-3 rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3a3 3 0 00-3 3v1a3 3 0 000 6v1a3 3 0 006 0V6a3 3 0 00-3-3zM15 3a3 3 0 013 3v1a3 3 0 010 6v1a3 3 0 01-6 0V6a3 3 0 013-3z"/>
             </svg>
           </div>
 
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">
-              Dashboard de Análise de Sentimento
-            </h1>
-            <p class="text-sm text-gray-600 mt-1">
-              Teste e visualize os resultados do modelo de IA em tempo real
-            </p>
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard de Análise de Sentimento</h1>
+            <p class="text-sm text-gray-600 mt-1">Teste e visualize os resultados do modelo de IA em tempo real</p>
           </div>
         </div>
       </div>
@@ -54,47 +33,17 @@
     <div class="bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="flex gap-8">
-          <!-- Teste do Modelo (ATIVO) -->
-          <button
-            class="flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm border-blue-600 text-blue-600"
-          >
-            <!-- TestTube icon -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 2v6l-5 9a4 4 0 003.5 6h9a4 4 0 003.5-6l-5-9V2"
-              />
+          <button class="flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm border-blue-600 text-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 2v6l-5 9a4 4 0 003.5 6h9a4 4 0 003.5-6l-5-9V2"/>
             </svg>
             Teste do Modelo
           </button>
 
-          <!-- Gráficos & Análises (INATIVO) -->
           <a href="./analiseGrafico.html">
-            <button
-              class="flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
-            >
-              <!-- BarChart icon -->
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 3v18h18M9 17V9M13 17V5M17 17v-7"
-                />
+            <button class="flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M9 17V9M13 17V5M17 17v-7"/>
               </svg>
               Gráficos & Análises
             </button>
@@ -104,71 +53,39 @@
     </div>
 
     <!-- ================= MAIN ================= -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <!-- INPUT SECTION -->
-      <div class="grid md:grid-cols-2 gap-6">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <!-- INPUT & UPLOAD (empilhados) -->
+      <div class="grid grid-cols-1 gap-6">
         <!-- Texto -->
         <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">
-            📄 Entrada de Texto
-          </h3>
-
-          <textarea
-            id="inputText"
-            placeholder="Digite uma frase para análise de sentimento..."
-            class="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
-          ></textarea>
-
-          <button
-            id="analyzeBtn"
-            class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg"
-          >
-            ➤ Analisar Frase
-          </button>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">📄 Entrada de Texto</h3>
+          <textarea id="inputText" placeholder="Digite uma frase para análise de sentimento..." class="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+          <button id="analyzeBtn" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg">➤ Analisar Frase</button>
         </div>
 
         <!-- Upload -->
         <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">
-            📤 Upload de Ficheiro
-          </h3>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">📤 Upload de Ficheiro</h3>
 
-          <div
-            class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
-          >
-            <p class="text-sm text-gray-600 mb-2">
-              Arraste ou selecione um ficheiro
-            </p>
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <p class="text-sm text-gray-600 mb-2">Arraste ou selecione um ficheiro</p>
             <p class="text-xs text-gray-500 mb-4">Formatos: .xlsx, .csv</p>
 
-            <input
-              type="file"
-              id="fileUpload"
-              accept=".xlsx,.csv"
-              class="hidden"
-            />
-            <label
-              for="fileUpload"
-              class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg cursor-pointer"
-            >
-              Selecionar Ficheiro
-            </label>
+            <input type="file" id="fileUpload" accept=".xlsx,.csv" class="hidden"/>
+            <label for="fileUpload" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg cursor-pointer">Selecionar Ficheiro</label>
           </div>
+
+          <!-- Container da pré-visualização será inserido aqui via JS -->
         </div>
       </div>
 
       <!-- ERRO -->
-      <div
-        id="errorBox"
-        class="hidden bg-red-50 border border-red-200 rounded-lg p-4 text-red-800"
-      ></div>
+      <div id="errorBox" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 text-red-800"></div>
 
       <!-- RESULTADO -->
       <div id="resultSection" class="hidden grid lg:grid-cols-3 gap-6">
-        <!-- Resultado -->
         <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
           <h3 class="text-lg font-semibold mb-4">Resultado da Classificação</h3>
-
           <p class="text-sm text-gray-600">Frase:</p>
           <p id="resultText" class="text-gray-900 mb-4"></p>
 
@@ -179,15 +96,11 @@
             </div>
             <div>
               <p class="text-sm text-gray-600">Confiança</p>
-              <p
-                id="resultConfidence"
-                class="text-2xl font-bold text-blue-600"
-              ></p>
+              <p id="resultConfidence" class="text-2xl font-bold text-blue-600"></p>
             </div>
           </div>
         </div>
 
-        <!-- Métricas -->
         <div class="bg-white rounded-lg shadow-md p-6">
           <h3 class="text-lg font-semibold mb-4">Métricas</h3>
           <ul class="space-y-2 text-sm">
@@ -200,12 +113,10 @@
       </div>
     </main>
 
-    <!-- ================= FOOTER ================= -->
     <footer class="bg-white border-t border-gray-200 mt-12">
       <div class="max-w-7xl mx-auto px-4 py-6">
         <p class="text-center text-sm text-gray-600">
-          Dashboard de Análise de Sentimento – Modelo de IA para Classificação
-          de Texto
+          Dashboard de Análise de Sentimento – Modelo de IA para Classificação de Texto
         </p>
       </div>
     </footer>
