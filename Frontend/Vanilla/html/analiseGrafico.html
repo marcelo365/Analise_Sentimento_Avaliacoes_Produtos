@@ -23,7 +23,6 @@
           <div
             class="bg-gradient-to-br from-blue-600 to-purple-600 p-3 rounded-xl"
           >
-            <!-- Ícone Brain (SVG inline para não depender de React) -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-8 h-8 text-white"
@@ -55,15 +54,10 @@
     <div class="bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="flex gap-8">
-          <!-- Teste do Modelo (inativo) -->
-          <a
-            href="./testeModelo.html"
-            
-          >
+          <a href="./testeModelo.html">
             <button
               class="flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
             >
-              <!-- TestTube icon -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="w-5 h-5"
@@ -78,16 +72,13 @@
                   d="M9 2v6l-5 9a4 4 0 003.5 6h9a4 4 0 003.5-6l-5-9V2"
                 />
               </svg>
-
               Teste do Modelo
             </button>
           </a>
 
-          <!-- Gráficos & Análises (ativo) -->
           <button
             class="flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm border-blue-600 text-blue-600"
           >
-            <!-- BarChart icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-5 h-5"
@@ -108,79 +99,146 @@
       </div>
     </div>
 
-    <!-- ================= MAIN CONTENT ================= -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- 🔽 AQUI ENTRA O CHARTS ANALYSIS (seu HTML atual) 🔽 -->
-      <div class="space-y-6">
-        <!-- Filters -->
+    <!-- ================= MAIN ================= -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <!-- CARD 1 -->
+
+      <div class="bg-white rounded-lg shadow-md p-6">
         <div
-          class="bg-white rounded-lg shadow-md p-6 flex flex-wrap gap-4 items-center"
+          class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4"
         >
-          <span class="font-medium text-gray-700">Filtros:</span>
+          <h3 class="text-lg font-semibold">Pré-visualização do Ficheiro</h3>
 
-          <div>
-            <label class="text-sm text-gray-600">Intervalo:</label>
-            <select id="timeRange" class="ml-2 px-3 py-2 border rounded-lg">
-              <option value="all">Todos</option>
-              <option value="last10">Últimos 10</option>
-              <option value="last20">Últimos 20</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-sm text-gray-600">Métrica:</label>
-            <select id="metric" class="ml-2 px-3 py-2 border rounded-lg">
-              <option value="accuracy">Acurácia</option>
-              <option value="precision">Precisão</option>
-              <option value="recall">Recall</option>
-            </select>
+          <!-- Filtro de confiança -->
+          <div class="flex items-center gap-2">
+            <label for="confidenceFilter" class="text-sm text-gray-600">
+              Confiança mínima (%):
+            </label>
+            <input
+              type="number"
+              id="confidenceFilter"
+              min="0"
+              max="100"
+              value="0"
+              class="w-24 px-3 py-2 border rounded-lg"
+              placeholder="Ex: 70"
+            />
           </div>
         </div>
 
-        <!-- Distribuição -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold mb-4">Distribuição das Classes</h3>
-          <div class="md:flex md:gap-8 items-center">
-            <div class="relative h-[300px] md:flex-1">
-              <canvas id="distributionChart"></canvas>
-            </div>
-            <div
-              class="flex flex-col justify-center space-y-4 mt-6 md:mt-0 md:w-60"
-              id="distributionValues"
-            ></div>
-          </div>
-        </div>
+        <table class="min-w-full border text-sm">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="border px-3 py-2">Texto</th>
+              <th class="border px-3 py-2">Predição</th>
+              <th class="border px-3 py-2">Confiança (%)</th>
+            </tr>
+          </thead>
+          <tbody id="excelPreviewTable"></tbody>
+        </table>
 
-        <!-- Desempenho -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold mb-4">
-            Desempenho ao Longo do Tempo
-          </h3>
-          <div class="relative h-[350px]">
+        <div class="flex justify-between items-center mt-4">
+          <button id="prevPage" class="px-4 py-2 bg-gray-200 rounded">◀</button>
+          <span id="pageInfo" class="text-sm text-gray-600"></span>
+          <button id="nextPage" class="px-4 py-2 bg-gray-200 rounded">▶</button>
+        </div>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold mb-6">Distribuição & Resumo</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="h-[280px]">
+            <canvas id="distributionChart"></canvas>
+          </div>
+
+          <div class="h-[280px]">
+            <canvas id="predictionVsTrueChart"></canvas>
+          </div>
+
+          <div id="distributionValues" class="space-y-3 text-sm"></div>
+        </div>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold mb-6">Desempenho do Modelo</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="h-[320px]">
             <canvas id="accuracyChart"></canvas>
           </div>
-        </div>
 
-        <!-- Correlação -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold mb-4">
-            Análise de Correlação: Comprimento do Texto vs Sentimento
-          </h3>
-          <div class="relative h-[350px]">
-            <canvas id="correlationChart"></canvas>
+          <div class="h-[320px]">
+            <canvas id="precisionRecallCurve"></canvas>
           </div>
         </div>
+      </div>
 
-        <!-- Matriz -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold mb-6 text-gray-800">
-            Matriz de Confusão
-          </h3>
-          <div class="overflow-x-auto">
-            <div
-              class="inline-block min-w-full"
-              id="confusionMatrixContainer"
-            ></div>
+      <!-- CARD 4 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold mb-6">Métricas por Classe</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="h-[320px]">
+            <canvas id="perClassMetricsChart"></canvas>
+          </div>
+
+          <table class="min-w-full border text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border px-3 py-2">Classe</th>
+                <th class="border px-3 py-2">Precisão</th>
+                <th class="border px-3 py-2">Recall</th>
+                <th class="border px-3 py-2">F1</th>
+              </tr>
+            </thead>
+            <tbody id="perClassMetricsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      
+      <!-- CARD 5 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold mb-6">Matriz de Confusão</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- ===== MATRIZ AZUL ===== -->
+          <div>
+            <p class="text-sm text-gray-600 mb-2 font-medium">
+              Real (linhas) vs Previsto (colunas)
+            </p>
+
+            <table class="min-w-full border text-sm text-center">
+              <thead class="bg-blue-100">
+                <tr id="cmHeader"></tr>
+              </thead>
+
+              <tbody id="confusionMatrixContainer"></tbody>
+            </table>
+          </div>
+
+          <!-- ===== TABELA TP FP FN TN ===== -->
+          <div>
+            <p class="text-sm text-gray-600 mb-2 font-medium">
+              Estatísticas por Classe
+            </p>
+
+            <table class="min-w-full border text-sm">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border px-3 py-2">Classe</th>
+                  <th class="border px-3 py-2">TP</th>
+                  <th class="border px-3 py-2">FP</th>
+                  <th class="border px-3 py-2">FN</th>
+                  <th class="border px-3 py-2">TN</th>
+                </tr>
+              </thead>
+
+              <tbody id="confusionStatsTable"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -190,12 +248,12 @@
     <footer class="bg-white border-t border-gray-200 mt-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <p class="text-center text-sm text-gray-600">
-          Dashboard de Análise de Sentimento - Modelo de IA para Classificação
-          de Texto
+          Dashboard de Análise de Sentimento — Modelo de IA
         </p>
       </div>
     </footer>
 
+    <!-- JS -->
     <script src="../js/analiseGrafico.js"></script>
   </body>
 </html>
