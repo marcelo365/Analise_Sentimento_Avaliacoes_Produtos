@@ -45,7 +45,7 @@ analyzeBtn.addEventListener("click", async () => {
     const response = await fetch("http://127.0.0.1:5000/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text }),
     });
 
     if (!response.ok) throw new Error("Erro na requisição à API");
@@ -57,8 +57,10 @@ analyzeBtn.addEventListener("click", async () => {
     resultConfidence.textContent = data.confidence + "%";
 
     resultSentiment.className = "text-2xl font-bold";
-    if (data.predicted === "Positiva") resultSentiment.classList.add("text-green-600");
-    else if (data.predicted === "Negativa") resultSentiment.classList.add("text-red-600");
+    if (data.predicted === "Positiva")
+      resultSentiment.classList.add("text-green-600");
+    else if (data.predicted === "Negativa")
+      resultSentiment.classList.add("text-red-600");
     else resultSentiment.classList.add("text-gray-600");
 
     resultSection.classList.remove("hidden");
@@ -66,7 +68,6 @@ analyzeBtn.addEventListener("click", async () => {
     mPrecision.textContent = "";
     mRecall.textContent = "";
     mF1.textContent = "";
-
   } catch (err) {
     showError("❌ Não foi possível conectar à API.");
     console.error(err);
@@ -129,16 +130,21 @@ function renderPreviewTable(data) {
   const start = (previewCurrentPage - 1) * previewRowsPerPage;
   const pageData = data.slice(start, start + previewRowsPerPage);
 
-  previewTableBody.innerHTML = pageData.map(row => `
+  previewTableBody.innerHTML = pageData
+    .map(
+      (row) => `
     <tr>
       <td class="border px-3 py-2">${row.text}</td>
       <td class="border px-3 py-2 font-semibold">${row.pred}</td>
       <td class="border px-3 py-2 text-center">${row.confidence.toFixed(2)}%</td>
     </tr>
-  `).join("");
+  `,
+    )
+    .join("");
 
   const totalPages = Math.max(1, Math.ceil(data.length / previewRowsPerPage));
-  document.getElementById("previewPageInfo").textContent = `Página ${previewCurrentPage} de ${totalPages}`;
+  document.getElementById("previewPageInfo").textContent =
+    `Página ${previewCurrentPage} de ${totalPages}`;
 }
 
 // Listener do upload
@@ -160,18 +166,12 @@ fileUpload.addEventListener("change", async (e) => {
 
     const response = await fetch("http://127.0.0.1:5000/predict-file", {
       method: "POST",
-      body: formData
+      body: formData,
     });
 
     if (!response.ok) throw new Error("Erro ao processar ficheiro");
 
     const data = await response.json();
-
-    // Atualiza métricas globais
-    mAccuracy.textContent = data.metrics.accuracy;
-    mPrecision.textContent = data.metrics.precision;
-    mRecall.textContent = data.metrics.recall;
-    mF1.textContent = data.metrics.f1;
 
     // Mostra resultado geral
     resultSection.classList.remove("hidden");
@@ -182,22 +182,35 @@ fileUpload.addEventListener("change", async (e) => {
     resultConfidence.textContent = "";
 
     // Pré-visualização
-    previewTableData = data.preview;
+    previewTableData = data.preview || [];
     previewCurrentPage = 1;
 
     // Cria container da tabela se ainda não existir
     if (!previewTableContainer) {
       previewTableContainer = document.createElement("div");
-      previewTableContainer.className = "bg-white rounded-lg shadow-md p-6 mt-4";
+      previewTableContainer.className =
+        "bg-white rounded-lg shadow-md p-6 mt-4";
       fileUpload.closest("div").appendChild(previewTableContainer);
       createPreviewTable(previewTableContainer);
     }
 
     renderPreviewTable(previewTableData);
 
+    // ===== Atualiza métricas globais apenas se existirem =====
+    if (data.metrics) {
+      mAccuracy.textContent = data.metrics.accuracy ?? "";
+      mPrecision.textContent = data.metrics.precision ?? "";
+      mRecall.textContent = data.metrics.recall ?? "";
+      mF1.textContent = data.metrics.f1 ?? "";
+    } else {
+      // Caso não haja métricas (sem label)
+      mAccuracy.textContent = "";
+      mPrecision.textContent = "";
+      mRecall.textContent = "";
+      mF1.textContent = "";
+    }
   } catch (err) {
-    showError("❌ Erro ao enviar ficheiro para a API.");
+    showError("❌ Não foi possível conectar à API.");
     console.error(err);
   }
 });
-

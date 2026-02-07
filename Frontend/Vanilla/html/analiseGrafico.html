@@ -100,53 +100,84 @@
     </div>
 
     <!-- ================= MAIN ================= -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <!-- CARD 1 -->
-
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <!-- ================= CARD 1 — PREVIEW ================= -->
       <div class="bg-white rounded-lg shadow-md p-6">
-        <div
-          class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4"
-        >
+        <div class="flex flex-col md:flex-row md:justify-between gap-4 mb-4">
           <h3 class="text-lg font-semibold">Pré-visualização do Ficheiro</h3>
 
-          <!-- Filtro de confiança -->
-          <div class="flex items-center gap-2">
-            <label for="confidenceFilter" class="text-sm text-gray-600">
-              Confiança mínima (%):
-            </label>
-            <input
-              type="number"
-              id="confidenceFilter"
-              min="0"
-              max="100"
-              value="0"
-              class="w-24 px-3 py-2 border rounded-lg"
-              placeholder="Ex: 70"
-            />
+          <div class="flex flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <label class="text-sm">Sub-palavra:</label>
+              <input
+                type="text"
+                id="textFilter"
+                placeholder="ex: produto"
+                class="px-3 py-2 border rounded-lg w-40"
+              />
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="text-sm">Confiança mínima:</label>
+              <input
+                type="number"
+                id="confidenceFilter"
+                min="0"
+                max="100"
+                value="0"
+                class="w-24 px-3 py-2 border rounded-lg"
+              />
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="text-sm">Sentimento:</label>
+              <select id="sentimentFilter" class="px-3 py-2 border rounded-lg">
+                <option value="ALL">Todos</option>
+                <option value="Positiva">Positiva</option>
+                <option value="Neutra">Neutra</option>
+                <option value="Negativa">Negativa</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <table class="min-w-full border text-sm">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="border px-3 py-2">Texto</th>
-              <th class="border px-3 py-2">Predição</th>
-              <th class="border px-3 py-2">Confiança (%)</th>
-            </tr>
-          </thead>
-          <tbody id="excelPreviewTable"></tbody>
-        </table>
+        <!-- ===== TABELA PREVIEW ===== -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full border text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border px-3 py-2 text-left">Texto</th>
+                <th class="border px-3 py-2">Predição</th>
+                <th class="border px-3 py-2">Confiança</th>
+              </tr>
+            </thead>
+            <tbody id="excelPreviewTable"></tbody>
+          </table>
+        </div>
 
+        <!-- ===== PAGINAÇÃO ===== -->
         <div class="flex justify-between items-center mt-4">
-          <button id="prevPage" class="px-4 py-2 bg-gray-200 rounded">◀</button>
+          <button
+            id="prevPage"
+            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            ◀
+          </button>
           <span id="pageInfo" class="text-sm text-gray-600"></span>
-          <button id="nextPage" class="px-4 py-2 bg-gray-200 rounded">▶</button>
+          <button
+            id="nextPage"
+            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            ▶
+          </button>
         </div>
       </div>
 
-      <!-- CARD 2 -->
+      <!-- ================= CARD 2 — DISTRIBUIÇÃO ================= -->
       <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold mb-6">Distribuição & Resumo</h3>
+        <h3 class="text-lg font-semibold mb-6">
+          Distribuição e Resumo das predições
+        </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="h-[280px]">
@@ -161,30 +192,25 @@
         </div>
       </div>
 
-      <!-- CARD 3 -->
+      <!-- ================= CARD 3 — DESEMPENHO =================   -->
       <div class="bg-white rounded-lg shadow-md p-6">
         <h3 class="text-lg font-semibold mb-6">Desempenho do Modelo</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Grafico 1 -->
           <div class="h-[320px]">
             <canvas id="confidenceByClassChart"></canvas>
           </div>
 
-          <!-- Grafico 2 -->
-          <div class="h-[320px]">
-            <canvas id="precisionRecallBarChart"></canvas>
-          </div>
+       
 
-          <!-- Novo gráfico Precision-Recall Curve -->
-          <div class="mt-8 h-[320px]">
+          <div class="h-[320px] ">
             <canvas id="precisionRecallCurveChart"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- CARD 4 -->
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <!-- ================= CARD 4 — MÉTRICAS ================= -->
+      <div class="bg-white rounded-lg shadow-md p-6" id="metricas">
         <h3 class="text-lg font-semibold mb-6">Métricas por Classe</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -206,12 +232,12 @@
         </div>
       </div>
 
-      <!-- CARD 5 -->
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <!-- ================= CARD 5 — MATRIZ CONFUSÃO ================= -->
+      <div class="bg-white rounded-lg shadow-md p-6" id="confusao">
         <h3 class="text-lg font-semibold mb-6">Matriz de Confusão</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- ===== MATRIZ AZUL ===== -->
+          <!-- MATRIZ -->
           <div>
             <p class="text-sm text-gray-600 mb-2 font-medium">
               Real (linhas) vs Previsto (colunas)
@@ -221,12 +247,11 @@
               <thead class="bg-blue-100">
                 <tr id="cmHeader"></tr>
               </thead>
-
               <tbody id="confusionMatrixContainer"></tbody>
             </table>
           </div>
 
-          <!-- ===== TABELA TP FP FN TN ===== -->
+          <!-- STATS -->
           <div>
             <p class="text-sm text-gray-600 mb-2 font-medium">
               Estatísticas por Classe
@@ -242,9 +267,19 @@
                   <th class="border px-3 py-2">TN</th>
                 </tr>
               </thead>
-
               <tbody id="confusionStatsTable"></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= CARD 6 — TOP PALAVRAS IMPORTANTES ================= -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold mb-6">Top Palavras Importantes</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+          <div class="h-[400px]">
+            <canvas id="topWordsChart"></canvas>
           </div>
         </div>
       </div>
@@ -252,14 +287,13 @@
 
     <!-- ================= FOOTER ================= -->
     <footer class="bg-white border-t border-gray-200 mt-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="max-w-7xl mx-auto px-4 py-6">
         <p class="text-center text-sm text-gray-600">
           Dashboard de Análise de Sentimento — Modelo de IA
         </p>
       </div>
     </footer>
 
-    <!-- JS -->
     <script src="../js/analiseGrafico.js"></script>
   </body>
 </html>
